@@ -1,8 +1,6 @@
 plugins {
     id("java")
     id("org.jetbrains.intellij") version "1.17.2"
-// required to run the 'idea [--no-configuration-cache]' gradle command prior to running the test so that the iml file loaded by TestUtils is present
-    id("idea")
 }
 
 group = "io.xarate"
@@ -15,9 +13,9 @@ repositories {
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-    version.set("2023.1.5")
+    version.set("2023.3.2")
     type.set("IC") // Target IDE Platform
-    plugins.set(listOf("java", "gherkin:231.8109.91", "org.intellij.intelliLang"))
+    plugins.set(listOf("java", "gherkin:233.11799.165", "org.intellij.intelliLang"))
 }
 
 tasks {
@@ -48,14 +46,10 @@ tasks {
 
     test {
         useJUnitPlatform()
-        dependsOn("idea")
-        finalizedBy("cleanIdea")
     }	
 }
 
 dependencies {
-// TestUtils expects karate-core to exist in the iml file so it has to be declared as a dependency (test scope only)
-    testImplementation("io.karatelabs:karate-core:1.5.0.RC3")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
 }
