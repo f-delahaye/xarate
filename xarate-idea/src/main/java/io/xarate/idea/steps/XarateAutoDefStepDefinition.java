@@ -10,18 +10,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @AutoDef steps are usually javascript functions which are registered in
+ * {@code @AutoDef} steps are usually javascript functions which are registered in
  * Karate's JS engine to add extra functionalities.
- *
+ *<p>
  * All operations in Karate UI defined in Driver are for example @AutoDef.
- *
+ *</p>
+ * <p>
  * Since they typically contain parenthesis (e.g. back() or input('p', 'foo'),
  * they are by default matched by ScenarioActions#eval.
- *
- * AuotDef steps, on the other hand, don't have any @Given/When annotation associated, the matching regex is derived from the  method name and the parameter.
+ * </p>
+ *<p>
+ * AutoDef steps, on the other hand, don't have any @Given/When annotation associated, the matching regex is derived from the  method name and the parameter.
  * This allows for better highlighting and code-completion.
- *
+ *</p>
+ * <p>
  * Note however that this is experimental
+ * </p>
  */
 public class XarateAutoDefStepDefinition extends AbstractStepDefinition {
 
@@ -39,26 +43,39 @@ public class XarateAutoDefStepDefinition extends AbstractStepDefinition {
         return Arrays.stream(getMethod().getParameterList().getParameters()).map(PsiParameter::getName).collect(Collectors.toList());
     }
 
-    // Method called for completion purposes, and it should return a regex human-readable.
-    // note that CucumberCompletionContributor will automatically replace (.+) with <string>, \d+ with <number>, ...
+    // Method called for highlighting purposes, and it should return a proper regex that will match steps.
+    // By default, getCucumberRegex delegates to getExpression which delegates to getCucumberRegexFromElement.
+    // However, this class's assumption is that getExpression returns a human readable expression e.g. for code completion purposes.
+    // So we override getCucumberRegex to delegate to getCucumberRegexFromElement directly. 
     @Override
+    public @Nullable String getCucumberRegex() {
+       return getCucumberRegexFromElement(getElement());
+    }
+	
     protected @Nullable String getCucumberRegexFromElement(PsiElement element) {
         if (element instanceof PsiMethod method) {
-            return Arrays.stream(method.getParameterList().getParameters())
-                    .map(this::asRegexParameter)
-                    // CucumberCompletionContributor removes the first ( but not the second one, hence ((
-                    .collect(Collectors.joining(", ", method.getName() + "((", "))"));
+            return getRegex(method, false);
         }
         return null;
     }
 
-//    @Override
-//    public boolean matches(@NotNull String stepName) {
-//        if (stepName.startsWith(AUTO_DEF_PREFIX)) {
-//            return super.matches(stepName.substring(AUTO_DEF_PREFIX.length()));
-//        }
-//        return false;
-//    }
+        // Method called for completion purposes, and it should return a regex human-readable.
+    // So, for example, parameters are separated by proper whitespaces, not \\h+
+    // Note that CucumberCompletionContributor will automatically replace (.+) with <string>, \d+ with <number>, ...
+    @Override
+    public @Nullable String getExpression() {
+        return getRegex(getMethod(), true);
+    }
+
+    private String getRegex(PsiMethod method, boolean humanReadable) {
+        String whitespace = humanReadable?" ":"\\h*";
+        // CucumberCompletionContributor removes the first ( but not the second one, hence ((
+        String openingParenthesis = humanReadable?"((":"\\(";
+        String closingParenthesis = humanReadable?"))":"\\)";
+        return Arrays.stream(method.getParameterList().getParameters())
+                .map(this::asRegexParameter)
+                .collect(Collectors.joining(","+whitespace, "^"+method.getName() + openingParenthesis, closingParenthesis+"$"));
+    }
 
     @Override
     public boolean supportsRename(@Nullable String newName) {

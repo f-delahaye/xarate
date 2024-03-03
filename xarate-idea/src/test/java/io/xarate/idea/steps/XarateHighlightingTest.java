@@ -48,7 +48,7 @@ class XarateHighlightingTest extends LightJavaCodeInsightFixtureTestCase5 {
                 """
                   Feature: Test
                     Scenario: Test
-                        * input<info descr="null"><info descr="null">('foo'</info>, <info descr="null">'bar')</info></info>
+                        * input(<info descr="null">'foo'</info>, <info descr="null">'bar'</info>)
                   """);
         fixture.checkHighlighting(true, true, true, true);
     }
@@ -60,12 +60,36 @@ class XarateHighlightingTest extends LightJavaCodeInsightFixtureTestCase5 {
                 """
                   Feature: Test
                     Scenario: Test
-                        * <info descr="null">input</info><info descr="null">(</info><info descr="null">'foo','bar')</info>
+                        * input(<info descr="null">'foo'</info>,<info descr="null">'bar'</info>)
                     """);
         fixture.checkHighlighting(true, true, true, true);
     }
 
 
+    @Test
+    void eval() {
+        JavaCodeInsightTestFixture fixture = getFixture();
+        fixture.configureByText(GherkinFileType.INSTANCE,
+                """
+                  Feature: Test
+                    Scenario: Test
+                        * <info descr="null">someCall</info><info descr="null">(</info><info descr="null">)</info>
+                    """);
+        fixture.checkHighlighting(true, true, true, false);
+    }
+
+    @Test
+    void evalKeyword() {
+        JavaCodeInsightTestFixture fixture = getFixture();
+        fixture.configureByText(GherkinFileType.INSTANCE,
+                """
+                  Feature: Test
+                    Scenario: Test
+                        * eval <info descr="null">someCall()</info>
+                    """);
+        fixture.checkHighlighting(true, true, true, false);
+
+    }
     @Override
     protected String getTestDataPath() {
         return "src/test/testdata";

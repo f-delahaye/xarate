@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.cucumber.BDDFrameworkType;
 import org.jetbrains.plugins.cucumber.StepDefinitionCreator;
 import org.jetbrains.plugins.cucumber.psi.GherkinFile;
+import org.jetbrains.plugins.cucumber.psi.GherkinFileType;
 import org.jetbrains.plugins.cucumber.steps.AbstractCucumberExtension;
 import org.jetbrains.plugins.cucumber.steps.AbstractStepDefinition;
 
@@ -25,22 +26,21 @@ public class XarateExtension extends AbstractCucumberExtension {
         JavaPsiFacade javaPsi = JavaPsiFacade.getInstance(module.getProject());
         GlobalSearchScope librariesScope = ProjectScope.getLibrariesScope(module.getProject());
 
+        Set<String> autoDefMethodNames = new TreeSet<>();
         PsiClass autoDef = javaPsi.findClass("com.intuit.karate.core.AutoDef", librariesScope);
         if (autoDef != null) {
-            for (PsiMethod annotated : AnnotatedElementsSearch.searchPsiMethods(autoDef, librariesScope)) {
-                XarateAutoDefStepDefinition def = new XarateAutoDefStepDefinition(annotated);
-                if (annotated.getName().equals("input")) {
-                    System.out.println("Found def matching "+def.getExpression());
-                }
-                steps.add(def);
+            for (PsiMethod autoDefMethod : AnnotatedElementsSearch.searchPsiMethods(autoDef, librariesScope)) {
+                steps.add(new XarateAutoDefStepDefinition(autoDefMethod));
+                autoDefMethodNames.add(autoDefMethod.getName());
             }
-        }
-        System.out.println(steps.size()+ " methods annotated with "+autoDef);
-
+        }       
         PsiClass karateActions = javaPsi.findClass("com.intuit.karate.ScenarioActions", librariesScope);
         if (karateActions != null) {
             for (PsiMethod method : karateActions.getAllMethods()) {
-                getKarateAnnotation(method).ifPresent(karateAnnotation -> steps.add(new XarateStepDefinition(method, karateAnnotation)));
+                getKarateAnnotation(method).ifPresent(karateAnnotation -> steps.add(
+                        method.getName().equals("eval") && method.getParameterList().getParametersCount() == 3 ?
+                                new XarateEvalStepDefinition(method, karateAnnotation, autoDefMethodNames) :
+                                new XarateStepDefinition(method, karateAnnotation)));
             }
         }
         return steps;
@@ -63,7 +63,7 @@ public class XarateExtension extends AbstractCucumberExtension {
 
     @Override
     public @NotNull BDDFrameworkType getStepFileType() {
-        return null;
+        return new BDDFrameworkType(GherkinFileType.INSTANCE);
     }
 
     @Override

@@ -12,7 +12,6 @@ import java.util.List;
 
 import static io.xarate.idea.TestUtils.createDescriptorWithKarate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 class XarateCompletionTest extends LightJavaCodeInsightFixtureTestCase5 {
     XarateCompletionTest()  {
@@ -68,6 +67,24 @@ class XarateCompletionTest extends LightJavaCodeInsightFixtureTestCase5 {
         // No completion, but should still be highlighted (maps to eval)
         assertEquals(Collections.emptyList(), completions);
     }
+
+    @Test
+    void evalKeyword() {
+        JavaCodeInsightTestFixture fixture = getFixture();
+
+        fixture.configureByText(GherkinFileType.INSTANCE,
+                """
+                  Feature: Test
+                    Scenario: Test
+                        * eva<caret>""");
+
+        fixture.complete(CompletionType.BASIC);
+        List<String> completions = fixture.getLookupElementStrings();
+        // No completion, but should still be highlighted (maps to eval)
+        assertEquals(Arrays.asList("eval", "eval <string>"), completions);
+    }
+
+
 
     @Override
     protected String getTestDataPath() {
