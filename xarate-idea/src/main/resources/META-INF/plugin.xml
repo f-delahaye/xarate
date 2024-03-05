@@ -12,6 +12,10 @@
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
     Xarate Plugin For IntelliJ IDEA. Enables Run/Debug Configurations, Step Annotations and Auto Completion.
+
+    Icon by <a href="https://freeicons.io/profile/75376">
+ian rahmadi kurniawan
+</a> on <a href="https://freeicons.io">freeicons.io</a>
   ]]></description>
 
     <vendor>Xarate</vendor>
@@ -20,6 +24,7 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
     <depends>org.intellij.intelliLang</depends>
+    <depends>com.intellij.modules.java</depends>
     <depends>gherkin</depends>
 
     <extensions defaultExtensionNs="com.intellij">
