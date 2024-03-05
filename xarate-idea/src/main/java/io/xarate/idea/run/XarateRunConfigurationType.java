@@ -6,11 +6,12 @@ import com.intellij.icons.AllIcons;
 import com.intellij.ide.ui.ProductIcons;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NotNullLazyValue;
+import icons.XarateIcons;
 import org.jetbrains.annotations.NotNull;
 
 public class XarateRunConfigurationType extends SimpleConfigurationType {
     protected XarateRunConfigurationType() {
-        super("XarateRunConfiguration", "Xarate", "Xarate Run Configuration", NotNullLazyValue.createValue(() -> ProductIcons.getInstance().getProductIcon()));
+        super("XarateRunConfiguration", "Xarate", "Xarate Run Configuration", NotNullLazyValue.createValue(() -> XarateIcons.RunConfigurationIcon));
     }
 
     @Override
