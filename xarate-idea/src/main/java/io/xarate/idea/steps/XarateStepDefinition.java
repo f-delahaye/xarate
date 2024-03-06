@@ -20,7 +20,7 @@ public class XarateStepDefinition extends AbstractStepDefinition {
         this.karateAnnotation = karateAnnotation;
     }
 
-    private PsiMethod getMethod() {
+    protected PsiMethod getMethod() {
         return (PsiMethod) getElement();
     }
 
@@ -39,5 +39,10 @@ public class XarateStepDefinition extends AbstractStepDefinition {
                 // but that does not work here.
                 // It's a bit confusing, especially since the replace() above is similar...
                 .replace("\"", "");
+    }
+
+    @Override
+    public boolean supportsRename(@Nullable String newName) {
+        return false;
     }
 }

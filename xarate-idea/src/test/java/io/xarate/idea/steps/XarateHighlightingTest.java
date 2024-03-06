@@ -16,7 +16,6 @@ class XarateHighlightingTest extends LightJavaCodeInsightFixtureTestCase5 {
     void matchedStepIsAnnotated() {
         JavaCodeInsightTestFixture fixture = getFixture();
 
-        fixture.allowTreeAccessForAllFiles();
         fixture.configureByText(GherkinFileType.INSTANCE,
         """
           Feature: Test
@@ -32,8 +31,6 @@ class XarateHighlightingTest extends LightJavaCodeInsightFixtureTestCase5 {
     @Test
     void unmatchedStepIsNotAnnotated() {
         JavaCodeInsightTestFixture fixture = getFixture();
-
-        fixture.allowTreeAccessForAllFiles();
         fixture.configureByText(GherkinFileType.INSTANCE,
                 """
                   Feature: Test
@@ -43,6 +40,56 @@ class XarateHighlightingTest extends LightJavaCodeInsightFixtureTestCase5 {
         fixture.checkHighlighting(true, true, true, true);
     }
 
+    // AutoDef with parameters
+    @Test
+    void input() {
+        JavaCodeInsightTestFixture fixture = getFixture();
+        fixture.configureByText(GherkinFileType.INSTANCE,
+                """
+                  Feature: Test
+                    Scenario: Test
+                        * input(<info descr="null">'foo'</info>, <info descr="null">'bar'</info>)
+                  """);
+        fixture.checkHighlighting(true, true, true, true);
+    }
+
+    @Test
+    void inputWithoutWhitespaces() {
+        JavaCodeInsightTestFixture fixture = getFixture();
+        fixture.configureByText(GherkinFileType.INSTANCE,
+                """
+                  Feature: Test
+                    Scenario: Test
+                        * input(<info descr="null">'foo'</info>,<info descr="null">'bar'</info>)
+                    """);
+        fixture.checkHighlighting(true, true, true, true);
+    }
+
+
+    @Test
+    void eval() {
+        JavaCodeInsightTestFixture fixture = getFixture();
+        fixture.configureByText(GherkinFileType.INSTANCE,
+                """
+                  Feature: Test
+                    Scenario: Test
+                        * <info descr="null">someCall</info><info descr="null">(</info><info descr="null">)</info>
+                    """);
+        fixture.checkHighlighting(true, true, true, false);
+    }
+
+    @Test
+    void evalKeyword() {
+        JavaCodeInsightTestFixture fixture = getFixture();
+        fixture.configureByText(GherkinFileType.INSTANCE,
+                """
+                  Feature: Test
+                    Scenario: Test
+                        * eval <info descr="null">someCall()</info>
+                    """);
+        fixture.checkHighlighting(true, true, true, false);
+
+    }
     @Override
     protected String getTestDataPath() {
         return "src/test/testdata";
